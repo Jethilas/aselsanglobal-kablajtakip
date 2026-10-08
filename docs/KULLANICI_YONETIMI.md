@@ -20,8 +20,10 @@ Kayıt olan herkes `izleyici` başlar; rolleri bir `admin` yükseltir.
    Kurumsal kullanımda **"Confirm email"** ayarını ekibe göre seç:
    - Kapalı = kayıt olan direkt girer (pratik, dahili ekip için).
    - Açık = e-posta doğrulaması ister (daha güvenli).
-4. `assets/js/supabase-config.example.js` dosyasını **`supabase-config.js`** adıyla
-   kopyalayıp URL + anon key'i yaz. Bu dosya `.gitignore`'dadır, commit'lenmez.
+4. `assets/js/supabase-config.js` dosyasını açıp URL + anon key'i yaz.
+   Bu dosya **commit'lenir** (anon key'in herkese görünmesi normaldir; Supabase'in
+   modeli böyledir, korumayı RLS politikaları yapar). `service_role` anahtarını
+   ASLA bu dosyaya yazma.
 5. Siteyi aç → **Kayıt Ol** ile ilk hesabı oluştur → SQL'de yükselt:
    ```sql
    update public.profiles set rol = 'admin' where email = 'sen@ornek.com';

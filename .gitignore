@@ -1,5 +1,7 @@
 *.tmp
 ~$*.xlsx
 __pycache__/
-# Supabase gerçek anahtarları (örnek dosya commit'lenir, bu commit'lenmez)
-assets/js/supabase-config.js
+# NOT: assets/js/supabase-config.js bilerek TAKIP EDILIR (commit'lenir).
+# İçindeki "anon public" anahtar herkese görünür; bu normaldir ve güvenlidir
+# (Supabase'in kendi modeli böyle; korumayı RLS politikaları yapar).
+# service_role anahtarını ASLA bu dosyaya yazma.
