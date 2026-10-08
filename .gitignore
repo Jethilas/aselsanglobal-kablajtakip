@@ -1,3 +1,5 @@
 *.tmp
 ~$*.xlsx
 __pycache__/
+# Supabase gerçek anahtarları (örnek dosya commit'lenir, bu commit'lenmez)
+assets/js/supabase-config.js

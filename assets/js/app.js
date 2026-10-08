@@ -441,4 +441,8 @@ function csvIndir(){
   a.href = URL.createObjectURL(blob); a.download = "tedarikci_skor_kart.csv"; a.click();
 }
 
-document.addEventListener("DOMContentLoaded", baslat);
+document.addEventListener("DOMContentLoaded", () => {
+  // Giriş kapısı varsa (auth.js) veri yükleme girişten sonra başlar.
+  if (window.AuthKapisi && window.AuthKapisi.beklet) window.AuthKapisi.hazir(baslat);
+  else baslat();
+});

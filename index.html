@@ -22,8 +22,11 @@
   <div class="ust-sag">
     <div id="veri-durum" class="veri-durum">Veri yükleniyor…</div>
     <div class="tarih-bilgi" id="uretilme-bilgi"></div>
+    <div id="kullanici-alani" class="kullanici-alani"></div>
   </div>
 </header>
+
+<div id="demo-bant" class="demo-bant" style="display:none"></div>
 
 <nav class="sekmeler" id="sekmeler">
   <button class="sekme aktif" data-sekme="genel">📊 Genel Bakış</button>
@@ -182,6 +185,26 @@
   <span id="alt-bilgi">Kablaj Senelik Özetler • GitHub Pages uyumlu • veriler tarayıcıda işlenir, sunucuya gönderilmez</span>
 </footer>
 
+<div id="giris-ekrani" class="giris-ekran">
+  <div class="giris-kutu">
+    <div class="giris-logo">🔌</div>
+    <h2>KABLAJ HATA ORAN TAKİP</h2>
+    <p class="giris-alt">Devam etmek için giriş yap veya kayıt ol</p>
+    <div class="giris-sekmeler">
+      <button id="tab-giris" class="aktif">Giriş Yap</button><button id="tab-kayit">Kayıt Ol</button>
+    </div>
+    <input id="auth-email" type="email" placeholder="e-posta" autocomplete="email">
+    <input id="auth-sifre" type="password" placeholder="şifre (min 6 karakter)" autocomplete="current-password">
+    <div id="auth-hata" class="auth-hata"></div>
+    <button id="btn-giris" class="btn btn-mavi btn-blok">Giriş Yap</button>
+    <button id="btn-kayit" class="btn btn-yesil btn-blok" style="display:none">Kayıt Ol</button>
+    <p class="giris-not">Yeni kayıtlar <b>İzleyici</b> rolüyle açılır (Genel Bakış + Trend). Yetki yükseltme için yöneticine başvur. Detay: <code>docs/KULLANICI_YONETIMI.md</code></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase-config.js"></script>
+<script src="assets/js/auth.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

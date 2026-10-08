@@ -77,3 +77,26 @@ tr:hover td{background:#dbeafe}
 footer{text-align:center;font-size:12px;color:var(--gri);padding:14px}
 /* ısı hücresi */
 .isi{display:inline-block;min-width:64px;padding:4px 6px;border-radius:5px;font-weight:bold;color:#fff}
+/* giriş kapısı */
+.giris-ekran{position:fixed;inset:0;background:linear-gradient(135deg,#172554,#1d4ed8);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.giris-kutu{background:#fff;border-radius:14px;padding:28px 30px;max-width:380px;width:100%;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.giris-logo{font-size:44px}
+.giris-kutu h2{font-size:19px;color:var(--lacivert);margin:6px 0 2px}
+.giris-alt{font-size:13px;color:var(--gri);margin-bottom:14px}
+.giris-sekmeler{display:flex;gap:6px;margin-bottom:12px}
+.giris-sekmeler button{flex:1;border:1px solid var(--cizgi);background:#f8fafc;border-radius:7px;
+  padding:8px;font-weight:bold;font-size:13px;cursor:pointer;color:#475569}
+.giris-sekmeler button.aktif{background:var(--lacivert);color:#fff;border-color:var(--lacivert)}
+.giris-kutu input{width:100%;padding:10px 12px;margin-bottom:10px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px}
+.btn-blok{width:100%;padding:10px}
+.auth-hata{color:var(--kirmizi);font-size:13px;font-weight:bold;min-height:20px;margin-bottom:8px}
+.giris-not{font-size:12px;color:var(--gri);margin-top:12px;line-height:1.6}
+.giris-not code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px}
+.kullanici-alani{margin-top:6px;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.kullanici-rozet{background:#e0e7ff;color:#3730a3;font-size:12px;font-weight:bold;
+  padding:4px 10px;border-radius:14px}
+.btn-kucuk{padding:5px 10px;font-size:12px}
+.demo-bant{background:#fef3c7;border:1px solid #f59e0b;color:#92400e;border-radius:10px;
+  padding:9px 14px;font-size:13px;font-weight:bold;margin-bottom:12px}

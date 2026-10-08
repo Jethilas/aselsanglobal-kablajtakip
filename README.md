@@ -51,11 +51,22 @@ data/summary.json  (+ data/manifest.json)
 yapamaz; zamanlanmış çekme için Actions + secret gerekir, şablon hazır
 (`srm_cek.yml.example`). Portalının dışa-aktar biçimini paylaşırsan doldururum.
 
+## Kullanıcı girişi (kayıt + rol bazlı)
+
+Site açılışta giriş ister (Supabase Auth, ücretsiz). Roller:
+`izleyici` → Genel Bakış + Trend • `yonetici` → + Üretim/Tedarikçi/Malzeme/Karşılaştır •
+`admin` → + Veri Yükle. Yeni kayıt `izleyici` başlar.
+
+Kurulum: `docs/KULLANICI_YONETIMI.md` (10 dk: proje aç → `supabase/schema.sql` çalıştır →
+`supabase-config.js` doldur → ilk hesabı admin yap). Anahtar girilmeden site **demo
+modunda** açılır. ⚠️ Public repoda `data/` dosyaları linkle indirilebilir; gerçek veri
+koruması için dokümandaki A/B seçeneklerini oku.
+
 ## Proje yapısı
 
 ```
-index.html  assets/css/style.css  assets/js/app.js
+index.html  assets/css/style.css  assets/js/{app,auth,supabase-config}.js
 data/  (Ocak.xlsx… + manifest.json + summary.json)
-scripts/build_data.py  docs/SRM_ENTEGRASYON.md
+scripts/build_data.py  supabase/schema.sql  docs/{SRM_ENTEGRASYON,KULLANICI_YONETIMI}.md
 .github/workflows/{pages,update-data,srm_cek.example}.yml
 ```
