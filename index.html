@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kablaj Hata Oran Takip | Aylık Denetim Analizleri</title>
+<meta name="description" content="Kablaj senelik özet Excel dosyalarına göre aylık karşılaştırmalı hata oranı analiz panosu. GitHub Pages uyumlu statik site.">
+<link rel="stylesheet" href="assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<header class="ust">
+  <div class="ust-sol">
+    <div class="logo">🔌</div>
+    <div>
+      <h1>KABLAJ HATA ORAN TAKİP</h1>
+      <p class="alt-baslik">Senelik Özetler &bull; Aylık karşılaştırmalı denetim analiz panosu</p>
+    </div>
+  </div>
+  <div class="ust-sag">
+    <div id="veri-durum" class="veri-durum">Veri yükleniyor…</div>
+    <div class="tarih-bilgi" id="uretilme-bilgi"></div>
+  </div>
+</header>
+
+<nav class="sekmeler" id="sekmeler">
+  <button class="sekme aktif" data-sekme="genel">📊 Genel Bakış</button>
+  <button class="sekme" data-sekme="trend">📈 Aylık Trend</button>
+  <button class="sekme" data-sekme="uretim">🏭 Üretim Yeri</button>
+  <button class="sekme" data-sekme="tedarikci">🏷️ Tedarikçiler</button>
+  <button class="sekme" data-sekme="malzeme">🧰 Malzeme / Kontrol</button>
+  <button class="sekme" data-sekme="karsilastir">⚖️ Ay Karşılaştır</button>
+  <button class="sekme" data-sekme="yukle">📥 Veri Yükle</button>
+</nav>
+
+<section class="filtreler">
+  <label>Aylar:
+    <select id="filtre-ay" multiple size="1"></select>
+  </label>
+  <label>Üretim Yeri:
+    <select id="filtre-uretim"><option value="">Tümü</option></select>
+  </label>
+  <label>Satıcı ara:
+    <input type="search" id="filtre-satici" placeholder="örn. TERA, CDK…">
+  </label>
+  <label>Sonuç:
+    <select id="filtre-sonuc">
+      <option value="">Tümü</option>
+      <option value="Uygun">Uygun</option>
+      <option value="Uygun Değil">Uygun Değil</option>
+    </select>
+  </label>
+  <button id="btn-sifirla" class="btn btn-gri">Filtreyi Temizle</button>
+  <button id="btn-csv" class="btn btn-yesil">⬇ Tedarikçi CSV indir</button>
+</section>
+
+<main>
+  <!-- GENEL -->
+  <section id="sekme-genel" class="panel aktif">
+    <div class="kartlar" id="kpi-kartlar"></div>
+    <div class="iki-kolon">
+      <div class="kart-grafik">
+        <h3>Aylık Hata Oranı Trendi (%)</h3>
+        <div class="grafik-kutu"><canvas id="gr-trend-mini"></canvas></div>
+      </div>
+      <div class="kart-grafik">
+        <h3>Üretim Yerine Göre Hata Oranı (%)</h3>
+        <div class="grafik-kutu"><canvas id="gr-uretim-mini"></canvas></div>
+      </div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Ay Özet Tablosu</h3>
+      <div class="tablo-sar"><table id="tbl-aylar"></table></div>
+    </div>
+  </section>
+
+  <!-- TREND -->
+  <section id="sekme-trend" class="panel">
+    <div class="kart-grafik">
+      <h3>Toplam Denetim + Uygun Değil (aylık, adet)</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-trend-adet"></canvas></div>
+    </div>
+    <div class="kart-grafik">
+      <h3>Hata Oranı Seyri (%) — ay + üretim yeri kırılımı</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-trend-oran"></canvas></div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Ay → Ay Değişim (puan farkı)</h3>
+      <div class="tablo-sar"><table id="tbl-degisim"></table></div>
+    </div>
+  </section>
+
+  <!-- URETIM -->
+  <section id="sekme-uretim" class="panel">
+    <div class="kart-grafik">
+      <h3>Üretim Yeri Bazında Toplam / Red (adet)</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-uretim-adet"></canvas></div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Üretim Yeri × Ay Isı Tablosu (hata oranı %)</h3>
+      <div class="tablo-sar"><table id="tbl-isi"></table></div>
+    </div>
+  </section>
+
+  <!-- TEDARIKCI -->
+  <section id="sekme-tedarikci" class="panel">
+    <div class="kart-grafik">
+      <h3>En Çok Denetimi Olan 15 Satıcı — Hata Oranı (%)</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-satici"></canvas></div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Tedarikçi Skor Kartı <span class="ipucu">(başlığa tıkla: sırala • satıra tıkla: detay)</span></h3>
+      <input type="search" id="satici-ara" placeholder="Tabloda satıcı ara…">
+      <div class="tablo-sar"><table id="tbl-satici"></table></div>
+      <div id="satici-detay"></div>
+    </div>
+  </section>
+
+  <!-- MALZEME -->
+  <section id="sekme-malzeme" class="panel">
+    <div class="iki-kolon">
+      <div class="kart-grafik">
+        <h3>Kontrol Türü Dağılımı</h3>
+        <div class="grafik-kutu"><canvas id="gr-kontrol"></canvas></div>
+      </div>
+      <div class="kart-grafik">
+        <h3>En Çok Red Alan 15 Malzeme (adet)</h3>
+        <div class="grafik-kutu"><canvas id="gr-malzeme"></canvas></div>
+      </div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Malzeme Detay (ilk 100)</h3>
+      <div class="tablo-sar"><table id="tbl-malzeme"></table></div>
+    </div>
+  </section>
+
+  <!-- KARSILASTIR -->
+  <section id="sekme-karsilastir" class="panel">
+    <div class="karsilastir-sec">
+      <label>A Dönemi: <select id="cmp-a"></select></label>
+      <label>B Dönemi: <select id="cmp-b"></select></label>
+      <button id="btn-cmp" class="btn btn-mavi">Karşılaştır</button>
+    </div>
+    <div class="kartlar" id="cmp-kartlar"></div>
+    <div class="kart-grafik">
+      <h3>A vs B — Üretim Yeri Hata Oranı (%)</h3>
+      <div class="grafik-kutu"><canvas id="gr-cmp"></canvas></div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Detay Fark Tablosu</h3>
+      <div class="tablo-sar"><table id="tbl-cmp"></table></div>
+    </div>
+  </section>
+
+  <!-- YUKLE -->
+  <section id="sekme-yukle" class="panel">
+    <div class="kart-tablo">
+      <h3>📥 Excel Yükleme — 3 yol</h3>
+      <ol class="yukle-liste">
+        <li><b>Otomatik (önerilen):</b> aylık SRM dökümünü <code>data/</code> klasörüne <code>Ocak.xlsx … Aralık.xlsx</code> adıyla at → <code>python scripts/build_data.py</code> çalıştır → commit+push. Site <code>data/summary.json</code>'dan hızlı açılır.</li>
+        <li><b>Anlık inceleme:</b> aşağıdaki alana dosyaları sürükle-bırak (commit gerekmez, tarayıcıda SheetJS ile okunur).</li>
+        <li><b>SRM otomasyon:</b> portal erişimin varsa <code>docs/SRM_ENTEGRASYON.md</code>'teki şablonu kullan (zamanlanmış GitHub Action + secret ile çekme). Detaylar o dosyada.</li>
+      </ol>
+      <div id="dropzone" class="dropzone">
+        <p>📂 Excel dosyalarını buraya sürükle-bırak<br><span>veya</span></p>
+        <label class="btn btn-mavi">Dosya Seç<input type="file" id="dosya-input" accept=".xlsx,.xls" multiple hidden></label>
+        <div id="yuklenen-liste" class="yuklenen-liste"></div>
+      </div>
+      <h3>Beklenen kolonlar (SRM dökümü)</h3>
+      <p class="kod-aciklama">Sheet1 ilk satır başlık olmalı. En kritik 6 kolon:
+      <code>Üretim Yeri</code> • <code>Satıcı Adı</code> • <code>Malzeme No</code> •
+      <code>Malzeme Tanımı</code> • <code>Denetim Sonucu</code> (Uygun / Uygun Değil) •
+      <code>Yaratılma Tarihi</code>. Kolon sırası farklı olsa da olur — isimden eşleştirilir.</p>
+      <button id="btn-demo-temizle" class="btn btn-gri">Yüklenenleri temizle (önbelleğe dön)</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="alt-bilgi">Kablaj Senelik Özetler • GitHub Pages uyumlu • veriler tarayıcıda işlenir, sunucuya gönderilmez</span>
+</footer>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

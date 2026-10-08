@@ -1,0 +1,38 @@
+name: SRM'den Çek (ŞABLON — etkin değil)
+
+# Bu dosya bilerek .example uzantılıdır; docs/SRM_ENTEGRASYON.md'deki
+# secret'lar tanımlanmadan çalıştırma. Etkinleştirmek için:
+#   1) Bu dosyayı srm_cek.yml adıyla kopyala
+#   2) SRM_URL / SRM_USER / SRM_PASS / SRM_RAPOR_ID secret'larını ekle
+#   3) Aşağıdaki "TODO" adımlarını portalının gerçek uçlarına göre doldur
+on:
+  schedule:
+    - cron: "0 5 1 * *"   # her ayın 1'i 05:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  srm-cek:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: TODO - SRM portalindan xlsx indir
+        run: |
+          echo "Portalına göre doldurulacak:"
+          echo "  curl -u '${{ secrets.SRM_USER }}:${{ secrets.SRM_PASS }}' \\"
+          echo "    '${{ secrets.SRM_URL }}?rapor=${{ secrets.SRM_RAPOR_ID }}' -o data/Ekim.xlsx"
+          exit 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install openpyxl
+          python scripts/build_data.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "veri: SRM'den tazelendi"
+          git push

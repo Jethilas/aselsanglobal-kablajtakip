@@ -1,0 +1,40 @@
+{
+  "dosyalar": [
+    {
+      "dosya": "Ağustos.xlsx",
+      "ay": "Ağustos"
+    },
+    {
+      "dosya": "Eylül.xlsx",
+      "ay": "Eylül"
+    },
+    {
+      "dosya": "Haziran.xlsx",
+      "ay": "Haziran"
+    },
+    {
+      "dosya": "Mart.xlsx",
+      "ay": "Mart"
+    },
+    {
+      "dosya": "Mayyıs.xlsx",
+      "ay": "Mayıs"
+    },
+    {
+      "dosya": "Nisan.xlsx",
+      "ay": "Nisan"
+    },
+    {
+      "dosya": "Ocak.xlsx",
+      "ay": "Ocak"
+    },
+    {
+      "dosya": "Temmuz.xlsx",
+      "ay": "Temmuz"
+    },
+    {
+      "dosya": "Şubat.xlsx",
+      "ay": "Şubat"
+    }
+  ]
+}
