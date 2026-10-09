@@ -9,8 +9,8 @@ var cfg = window.SUPABASE_CONFIG || {};
 var KURULU = !!(cfg.URL && cfg.ANON_KEY && cfg.URL.indexOf("http") === 0);
 
 var ROL_SEKMELER = {
-  admin:    ["genel", "trend", "uretim", "tedarikci", "malzeme", "karsilastir", "yukle"],
-  yonetici: ["genel", "trend", "uretim", "tedarikci", "malzeme", "karsilastir"],
+  admin:    ["genel", "trend", "uretim", "tedarikci", "malzeme", "karsilastir", "sure", "yukle"],
+  yonetici: ["genel", "trend", "uretim", "tedarikci", "malzeme", "karsilastir", "sure"],
   izleyici: ["genel", "trend"]
 };
 var ROL_AD = { admin: "Yönetici", yonetici: "Sorumlu", izleyici: "İzleyici" };

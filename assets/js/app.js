@@ -38,6 +38,7 @@ function setDurum(msj, cls){ DURUM.textContent = msj; DURUM.className = "veri-du
 let OZET = null;          // summary.json veya hesaplanan özet
 let HAM = [];             // satır bazında ham kayıtlar (filtreler için)
 let MANIFEST = [];
+let SURE = null;          // sure_ozet.json (Denetim Süreleri birleşimi, opsiyonel)
 
 /* ---------- kolon eşleştirme (Türkçe toleranslı) ---------- */
 function norm(s){
@@ -331,6 +332,60 @@ function karsilastir(){
         <td><b style="color:${f<=0?"#16a34a":"#dc2626"}">${f>0?"+":""}${f.toFixed(2)}</b></td></tr>`;}).join("");
 }
 
+/* ---------- süre verimliliği (Denetim Süreleri birleşimi) ---------- */
+async function sureBaslat() {
+  try {
+    const r = await fetch("data/sure_ozet.json", { cache: "no-store" });
+    if (!r.ok) throw new Error("yok");
+    SURE = await r.json();
+  } catch (e) { SURE = null; }
+  renderSure();
+}
+function renderSure() {
+  const kpi = document.getElementById("sure-kpi");
+  if (!SURE) {
+    kpi.innerHTML = `<div class="kpi turuncu"><div class="ad">Süre verisi yok</div>
+      <div class="delta">Henüz üretilmedi — <code>python scripts/build_sure.py --sure "&lt;Denetim Süreleri.xlsx yolu&gt;"</code> çalıştır.</div></div>`;
+    return;
+  }
+  const m = SURE.meta;
+  kpi.innerHTML = `
+    <div class="kpi"><div class="ad">⏱ Ortanca Denetim Süresi</div><div class="deger">${m.sure_medyan_dk} dk</div><div class="delta">${fmt(m.kablaj_satir)} kablaj satırı</div></div>
+    <div class="kpi"><div class="ad">p90 Süre</div><div class="deger">${m.sure_p90_dk} dk</div><div class="delta">%90'ı bunun altında</div></div>
+    <div class="kpi yesil"><div class="ad">⏳ Ortanca Bekleme</div><div class="deger">${m.bekleme_medyan_gun} gün</div><div class="delta">Yaratma → denetim başı</div></div>
+    <div class="kpi turuncu"><div class="ad">🔒 Ortanca Kapanma</div><div class="deger">${m.kapanma_medyan_saat} sa</div><div class="delta">Denetim sonu → kayıt kapanışı</div></div>`;
+  const A = SURE.aylik;
+  grafik("gr-sure-trend", { type: "line",
+    data: { labels: A.map(a => ayAd(a.ay)), datasets: [
+      { label: "Medyan (dk)", data: A.map(a => a.sure_medyan), borderColor: "#1d4ed8", tension: .3 },
+      { label: "p90 (dk)", data: A.map(a => a.sure_p90), borderColor: "#dc2626", borderDash: [6, 4], tension: .3 }]},
+    options: { responsive: true, maintainAspectRatio: false }});
+  grafik("gr-sure-dagilim", { type: "bar",
+    data: { labels: SURE.dagilim.map(d => d.aralik), datasets: [{ label: "Adet", data: SURE.dagilim.map(d => d.adet), backgroundColor: "#1d4ed8" }]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }}}});
+  grafik("gr-sure-bekle", { type: "bar",
+    data: { labels: A.map(a => ayAd(a.ay)), datasets: [
+      { label: "Bekleme (gün)", data: A.map(a => a.bekleme_medyan_gun), backgroundColor: "#93c5fd", yAxisID: "y" },
+      { label: "Kapanma (saat)", data: A.map(a => a.kapanma_medyan_saat), type: "line", borderColor: "#ea580c", tension: .3, yAxisID: "y1" }]},
+    options: { responsive: true, maintainAspectRatio: false,
+      scales: { y: { title: { display: true, text: "gün" }}, y1: { position: "right", title: { display: true, text: "saat" }, grid: { drawOnChartArea: false }}}}});
+  const top = SURE.firmalar.slice(0, 15);
+  grafik("gr-sure-firma", { type: "bar",
+    data: { labels: top.map(f => f.ad.slice(0, 34)), datasets: [{ label: "Medyan (dk)", data: top.map(f => f.sure_medyan), backgroundColor: top.map(f => isiRenk(f.sure_medyan, 30)) }]},
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }}}});
+  document.getElementById("tbl-sure").innerHTML =
+    `<tr><th>Firma</th><th>Denetim</th><th>Medyan (dk)</th><th>p90 (dk)</th><th>Bekleme (gün)</th><th>Kapanma (sa)</th></tr>` +
+    SURE.firmalar.map(f => `<tr><td class="sol">${f.ad}</td><td>${fmt(f.n)}</td>
+      <td><span class="rozet ${f.sure_medyan <= 20 ? "r-yesil" : f.sure_medyan <= 40 ? "r-mavi" : "r-turuncu"}">${f.sure_medyan}</span></td>
+      <td>${f.sure_p90}</td><td>${f.bekleme_medyan_gun ?? "–"}</td><td>${f.kapanma_medyan_saat ?? "–"}</td></tr>`).join("");
+  const d = m.dislanan || {};
+  document.getElementById("sure-not").innerHTML =
+    `Kapsam: aylık kablaj dökümlerindeki ${fmt(m.kablaj_talep)} talebin %${m.eslesme_oran}'i süre dosyasıyla eşleşti ` +
+    `(${fmt(m.eslesen_talep)} talep, ${fmt(m.kablaj_satir)} denetim satırı, ${m.uretilme}). ` +
+    `Aralık dışı bırakılanlar: süre ${fmt(d.sure_disi || 0)}, bekleme ${fmt(d.bekleme_disi || 0)}, kapanma ${fmt(d.kapanma_disi || 0)}. ` +
+    `Not: firmaların farklı yazımları (örn. CDK / CDK SAV.) ayrı satırdadır — isim standardizasyonu SRM'de düzeltilmeli.`;
+}
+
 /* ---------- veri yükleme ---------- */
 async function baslat(){
   sekmeleriBagla();
@@ -443,6 +498,7 @@ function csvIndir(){
 
 document.addEventListener("DOMContentLoaded", () => {
   // Giriş kapısı varsa (auth.js) veri yükleme girişten sonra başlar.
-  if (window.AuthKapisi && window.AuthKapisi.beklet) window.AuthKapisi.hazir(baslat);
-  else baslat();
+  const boot = () => { baslat(); sureBaslat(); };
+  if (window.AuthKapisi && window.AuthKapisi.beklet) window.AuthKapisi.hazir(boot);
+  else boot();
 });

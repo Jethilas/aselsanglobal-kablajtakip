@@ -35,6 +35,7 @@
   <button class="sekme" data-sekme="tedarikci">🏷️ Tedarikçiler</button>
   <button class="sekme" data-sekme="malzeme">🧰 Malzeme / Kontrol</button>
   <button class="sekme" data-sekme="karsilastir">⚖️ Ay Karşılaştır</button>
+  <button class="sekme" data-sekme="sure">⏱ Süreler</button>
   <button class="sekme" data-sekme="yukle">📥 Veri Yükle</button>
 </nav>
 
@@ -157,6 +158,34 @@
     </div>
   </section>
 
+  <!-- SURELER -->
+  <section id="sekme-sure" class="panel">
+    <div class="kartlar" id="sure-kpi"></div>
+    <div class="iki-kolon">
+      <div class="kart-grafik">
+        <h3>Aylık Ortanca Denetim Süresi (dk) — medyan + p90</h3>
+        <div class="grafik-kutu"><canvas id="gr-sure-trend"></canvas></div>
+      </div>
+      <div class="kart-grafik">
+        <h3>Süre Dağılımı (kablaj, adet)</h3>
+        <div class="grafik-kutu"><canvas id="gr-sure-dagilim"></canvas></div>
+      </div>
+    </div>
+    <div class="kart-grafik">
+      <h3>Aylık Bekleme (gün, bar) + Kapanma (saat, çizgi)</h3>
+      <div class="grafik-kutu"><canvas id="gr-sure-bekle"></canvas></div>
+    </div>
+    <div class="kart-grafik">
+      <h3>En Çok Denetim Yapılan 15 Firma — Ortanca Süre (dk)</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-sure-firma"></canvas></div>
+    </div>
+    <div class="kart-tablo">
+      <h3>Firma Süre Tablosu (ilk 30)</h3>
+      <div class="tablo-sar"><table id="tbl-sure"></table></div>
+      <p class="kod-aciklama" id="sure-not"></p>
+    </div>
+  </section>
+
   <!-- YUKLE -->
   <section id="sekme-yukle" class="panel">
     <div class="kart-tablo">
@@ -165,6 +194,8 @@
         <li><b>Otomatik (önerilen):</b> aylık SRM dökümünü <code>data/</code> klasörüne <code>Ocak.xlsx … Aralık.xlsx</code> adıyla at → <code>python scripts/build_data.py</code> çalıştır → commit+push. Site <code>data/summary.json</code>'dan hızlı açılır.</li>
         <li><b>Anlık inceleme:</b> aşağıdaki alana dosyaları sürükle-bırak (commit gerekmez, tarayıcıda SheetJS ile okunur).</li>
         <li><b>SRM otomasyon:</b> portal erişimin varsa <code>docs/SRM_ENTEGRASYON.md</code>'teki şablonu kullan (zamanlanmış GitHub Action + secret ile çekme). Detaylar o dosyada.</li>
+        <li><b>Süre verimliliği:</b> <code>Denetim Süreleri.xlsx</code> dosyasını repoya KOYMA (23 MB). Yerinde okut:
+        <code>python scripts/build_sure.py --sure "…\Denetim Süreleri (33).xlsx"</code> → <code>data/sure_ozet.json</code> üretilir, ⏱ Süreler sekmesi dolar.</li>
       </ol>
       <div id="dropzone" class="dropzone">
         <p>📂 Excel dosyalarını buraya sürükle-bırak<br><span>veya</span></p>

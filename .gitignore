@@ -1,6 +1,8 @@
 *.tmp
 ~$*.xlsx
 __pycache__/
+# 23 MB'lık ham süre dosyası repoya girmez; sadece özeti (sure_ozet.json) commit'lenir
+data/Denetim*.xlsx
 # NOT: assets/js/supabase-config.js bilerek TAKIP EDILIR (commit'lenir).
 # İçindeki "anon public" anahtar herkese görünür; bu normaldir ve güvenlidir
 # (Supabase'in kendi modeli böyle; korumayı RLS politikaları yapar).

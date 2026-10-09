@@ -66,7 +66,18 @@ koruması için dokümandaki A/B seçeneklerini oku.
 
 ```
 index.html  assets/css/style.css  assets/js/{app,auth,supabase-config}.js
-data/  (Ocak.xlsx… + manifest.json + summary.json)
-scripts/build_data.py  supabase/schema.sql  docs/{SRM_ENTEGRASYON,KULLANICI_YONETIMI}.md
+data/  (Ocak.xlsx… + manifest.json + summary.json + sure_ozet.json)
+scripts/{build_data,build_sure}.py  supabase/schema.sql  docs/{SRM_ENTEGRASYON,KULLANICI_YONETIMI}.md
 .github/workflows/{pages,update-data,srm_cek.example}.yml
+```
+
+## Süre verimliliği (Denetim Süreleri)
+
+⏱ Süreler sekmesi; 190 bin satırlık süre dosyasını kablaj talepleriyle birleştirir
+(ortanca denetim süresi, bekleme ve kapanma süreleri — firma/ay kırılımı).
+23 MB'lık ham dosya repoya girmez; özeti yerinden üret:
+
+```powershell
+python scripts/build_sure.py --sure "C:\Users\user\Desktop\Kablaj Senelik Özetler\Denetim Süreleri (33).xlsx"
+git add data/sure_ozet.json; git commit -m "veri: sure ozeti"; git push
 ```

@@ -8,7 +8,7 @@ Kayıt olan herkes `izleyici` başlar; rolleri bir `admin` yükseltir.
 | Rol | Görebildikleri |
 |---|---|
 | `izleyici` (varsayılan) | 📊 Genel Bakış, 📈 Aylık Trend |
-| `yonetici` | + 🏭 Üretim Yeri, 🏷️ Tedarikçiler, 🧰 Malzeme, ⚖️ Ay Karşılaştır |
+| `yonetici` | + 🏭 Üretim Yeri, 🏷️ Tedarikçiler, 🧰 Malzeme, ⚖️ Ay Karşılaştır, ⏱ Süreler |
 | `admin` | + 📥 Veri Yükle |
 
 ## Kurulum (10 dk, bir kez)
