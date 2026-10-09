@@ -41,7 +41,8 @@ def norm(s):
 
 # SRM dökümünün bilinen sabit kolon sırası (isim eşleşmesi başarısız olursa yedek)
 YEDEK_INDEX = {"uretim": 3, "satici": 7, "malz_no": 8, "malz_ad": 11,
-               "sonuc": 31, "kontrol": 4, "tarih": 22, "denetim_turu": 14}
+               "sonuc": 31, "kontrol": 4, "tarih": 22, "denetim_turu": 14,
+               "talep": 1}
 
 def kolon_bul(basliklar):
     n = [norm(b) for b in basliklar]
@@ -61,6 +62,7 @@ def kolon_bul(basliklar):
         "kontrol": bul("kontrol turu"),
         "tarih": bul("yaratilm"),
         "denetim_turu": bul("denetim turu"),
+        "talep": bul("denetim talep no"),
     }
 
 def sonuc_sinif(v):
@@ -104,6 +106,7 @@ def dosyayi_oku(yol, ay):
         sonuc = al(K["sonuc"])
         kayitlar.append({
             "ay": ay,
+            "talep": al(K["talep"]),
             "uretim": al(K["uretim"]) or "Bilinmiyor",
             "satici": al(K["satici"]) or "Bilinmiyor",
             "malzNo": al(K["malz_no"]),

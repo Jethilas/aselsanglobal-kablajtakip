@@ -74,8 +74,18 @@
         <div class="grafik-kutu"><canvas id="gr-uretim-mini"></canvas></div>
       </div>
     </div>
+    <div class="iki-kolon">
+      <div class="kart-grafik">
+        <h3>Sonuç Dağılımı (adet)</h3>
+        <div class="grafik-kutu"><canvas id="gr-sonuc"></canvas></div>
+      </div>
+      <div class="kart-grafik">
+        <h3>Üretim Yerlerinin Denetim Hacmindeki Payı</h3>
+        <div class="grafik-kutu"><canvas id="gr-uretim-pay"></canvas></div>
+      </div>
+    </div>
     <div class="kart-tablo">
-      <h3>Ay Özet Tablosu</h3>
+      <h3>Ay Özet Tablosu <span class="ipucu">(satıra tıkla: o ayın kayıtlarını listele)</span></h3>
       <div class="tablo-sar"><table id="tbl-aylar"></table></div>
     </div>
   </section>
@@ -83,7 +93,11 @@
   <!-- TREND -->
   <section id="sekme-trend" class="panel">
     <div class="kart-grafik">
-      <h3>Toplam Denetim + Uygun Değil (aylık, adet)</h3>
+      <h3>Toplam Denetim + Uygun Değil (aylık, adet)
+        <span class="grafik-tip">
+          <button id="tip-bar" class="btn btn-gri btn-kucuk aktif-tip">Bar</button><button id="tip-cizgi" class="btn btn-gri btn-kucuk">Çizgi</button>
+        </span>
+      </h3>
       <div class="grafik-kutu uzun"><canvas id="gr-trend-adet"></canvas></div>
     </div>
     <div class="kart-grafik">
@@ -98,12 +112,13 @@
 
   <!-- URETIM -->
   <section id="sekme-uretim" class="panel">
+    <div class="kartlar" id="sektor-kartlar"></div>
     <div class="kart-grafik">
       <h3>Üretim Yeri Bazında Toplam / Red (adet)</h3>
       <div class="grafik-kutu uzun"><canvas id="gr-uretim-adet"></canvas></div>
     </div>
     <div class="kart-tablo">
-      <h3>Üretim Yeri × Ay Isı Tablosu (hata oranı %)</h3>
+      <h3>Üretim Yeri × Ay Isı Tablosu (hata oranı %) <span class="ipucu">(hücreye tıkla: kayıtları listele)</span></h3>
       <div class="tablo-sar"><table id="tbl-isi"></table></div>
     </div>
   </section>
@@ -113,6 +128,10 @@
     <div class="kart-grafik">
       <h3>En Çok Denetimi Olan 15 Satıcı — Hata Oranı (%)</h3>
       <div class="grafik-kutu uzun"><canvas id="gr-satici"></canvas></div>
+    </div>
+    <div class="kart-grafik">
+      <h3>Pareto — Redlerin Hangi Satıcılarda Yığıldığı (bar: red adedi, çizgi: kümülatif %)</h3>
+      <div class="grafik-kutu uzun"><canvas id="gr-pareto"></canvas></div>
     </div>
     <div class="kart-tablo">
       <h3>Tedarikçi Skor Kartı <span class="ipucu">(başlığa tıkla: sırala • satıra tıkla: detay)</span></h3>
@@ -230,6 +249,14 @@
     <button id="btn-giris" class="btn btn-mavi btn-blok">Giriş Yap</button>
     <button id="btn-kayit" class="btn btn-yesil btn-blok" style="display:none">Kayıt Ol</button>
     <p class="giris-not">Yeni kayıtlar <b>İzleyici</b> rolüyle açılır (Genel Bakış + Trend). Yetki yükseltme için yöneticine başvur. Detay: <code>docs/KULLANICI_YONETIMI.md</code></p>
+  </div>
+</div>
+
+<div id="detay-modal" class="modal">
+  <div class="modal-kutu">
+    <div class="modal-baslik"><h2 id="detay-baslik">Detay</h2><button id="detay-kapat" class="btn btn-gri">Kapat ✕</button></div>
+    <div id="detay-bilgi" class="detay-bilgi"></div>
+    <div class="tablo-sar"><table id="detay-tablo"></table></div>
   </div>
 </div>
 

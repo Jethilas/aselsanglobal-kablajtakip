@@ -77,6 +77,21 @@ tr:hover td{background:#dbeafe}
 footer{text-align:center;font-size:12px;color:var(--gri);padding:14px}
 /* ısı hücresi */
 .isi{display:inline-block;min-width:64px;padding:4px 6px;border-radius:5px;font-weight:bold;color:#fff}
+/* tıklanabilir kart/satır */
+.kpi-tik{cursor:pointer;transition:box-shadow .15s}
+.kpi-tik:hover{box-shadow:0 4px 14px rgba(29,78,216,.25)}
+#tbl-aylar tr.satir{cursor:pointer}
+#tbl-isi td[data-u]{cursor:pointer}
+/* grafik tip düğmeleri */
+.grafik-tip{float:right;display:inline-flex;gap:4px}
+.aktif-tip{background:var(--lacivert) !important;color:#fff !important}
+/* detay modalı */
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:300;padding:24px;overflow:auto}
+.modal.acik{display:block}
+.modal-kutu{background:#fff;border-radius:12px;max-width:1100px;margin:auto;padding:18px 20px}
+.modal-baslik{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px}
+.modal-baslik h2{font-size:17px;color:var(--lacivert)}
+.detay-bilgi{font-size:13px;color:var(--gri);margin-bottom:10px}
 /* giriş kapısı */
 .giris-ekran{position:fixed;inset:0;background:linear-gradient(135deg,#172554,#1d4ed8);z-index:200;
   display:flex;align-items:center;justify-content:center;padding:20px}

@@ -62,6 +62,7 @@ function kolonIndex(basliklar){
     kontrol: bul("kontrol turu"),
     tarih:   bul("yaratilm"),
     denetimTuru: bul("denetim turu"),
+    talep:   bul("denetim talep"),
   };
 }
 function sonucSinif(v){
@@ -86,6 +87,7 @@ async function xlsxOku(arrayBuffer, ayEtiket){
     const sonuc = K.sonuc>=0 ? String(r[K.sonuc]||"").trim() : "";
     out.push({
       ay: ayEtiket,
+      talep: K.talep>=0 ? String(r[K.talep]||"").trim() : "",
       uretim: K.uretim>=0 ? String(r[K.uretim]||"").trim() || "Bilinmiyor" : "Bilinmiyor",
       satici: K.satici>=0 ? String(r[K.satici]||"").trim() || "Bilinmiyor" : "Bilinmiyor",
       malzNo: K.malzNo>=0 ? String(r[K.malzNo]||"").trim() : "",
@@ -183,9 +185,9 @@ function renderKPI(o){
   const son = aylik[aylik.length-1], once = aylik[aylik.length-2];
   const fark = (son && once) ? (son.hata_oran-once.hata_oran) : null;
   document.getElementById("kpi-kartlar").innerHTML = `
-    <div class="kpi"><div class="ad">Toplam Denetim</div><div class="deger">${fmt(g.toplam)}</div><div class="delta">${o.aylar.length} ay • ${g.saticiSayi} satıcı</div></div>
-    <div class="kpi yesil"><div class="ad">✅ Uygun</div><div class="deger">${fmt(g.uygun)}</div><div class="delta">%${pct(g.uygun,g.toplam).toFixed(1)}</div></div>
-    <div class="kpi kirmizi"><div class="ad">❌ Uygun Değil</div><div class="deger">${fmt(g.red)}</div><div class="delta">%${g.oran}</div></div>
+    <div class="kpi kpi-tik" data-kpi="tum" title="Tıkla: tüm kayıtları listele"><div class="ad">Toplam Denetim</div><div class="deger">${fmt(g.toplam)}</div><div class="delta">${o.aylar.length} ay • ${g.saticiSayi} satıcı</div></div>
+    <div class="kpi yesil kpi-tik" data-kpi="uygun" title="Tıkla: uygun kayıtları listele"><div class="ad">✅ Uygun</div><div class="deger">${fmt(g.uygun)}</div><div class="delta">%${pct(g.uygun,g.toplam).toFixed(1)}</div></div>
+    <div class="kpi kirmizi kpi-tik" data-kpi="red" title="Tıkla: red kayıtlarını listele"><div class="ad">❌ Uygun Değil</div><div class="deger">${fmt(g.red)}</div><div class="delta">%${g.oran}</div></div>
     <div class="kpi turuncu"><div class="ad">⚠️ Hata Oranı</div><div class="deger">%${g.oran}</div>
       <div class="delta ${fark==null?"":fark<=0?"iyi":"kotu"}">${fark==null?"":(fark>0?"+":"")+fark.toFixed(2)+" puan (önceki aya göre)"}</div></div>
     <div class="kpi"><div class="ad">En riskli üretim yeri</div><div class="deger" style="font-size:18px">${o.uretimTop.slice().sort((a,b)=>b.oran-a.oran)[0]?.yer||"–"}</div>
@@ -197,20 +199,29 @@ function renderKPI(o){
   grafik("gr-uretim-mini", {type:"bar",
     data:{labels:o.uretimTop.map(u=>u.yer), datasets:[{label:"Hata oranı %", data:o.uretimTop.map(u=>u.oran), backgroundColor:o.uretimTop.map(u=>isiRenk(u.oran,12))}]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}}});
+  grafik("gr-sonuc", {type:"doughnut",
+    data:{labels:["Uygun","Uygun Değil","Diğer/Boş"], datasets:[{data:[g.uygun,g.red,g.toplam-g.uygun-g.red],
+      backgroundColor:["#16a34a","#dc2626","#94a3b8"]}]},
+    options:{responsive:true, maintainAspectRatio:false}});
+  grafik("gr-uretim-pay", {type:"doughnut",
+    data:{labels:o.uretimTop.map(u=>u.yer), datasets:[{data:o.uretimTop.map(u=>u.toplam),
+      backgroundColor:["#1d4ed8","#16a34a","#ea580c","#9333ea","#64748b","#0d9488"]}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"right"}}}});
   document.getElementById("tbl-aylar").innerHTML =
     `<tr><th>Ay</th><th>Toplam</th><th>Uygun</th><th>Uygun Değil</th><th>Hata Oranı</th><th>Önceki Aya Fark</th></tr>` +
     aylik.map((a,i)=>{ const f = i>0 ? a.hata_oran-aylik[i-1].hata_oran : null;
-      return `<tr><td class="sol"><b>${ayAd(a.ay)}</b></td><td>${fmt(a.toplam)}</td><td>${fmt(a.uygun)}</td>
+      return `<tr class="satir" data-ay="${a.ay}" title="Tıkla: ${ayAd(a.ay)} kayıtlarını listele"><td class="sol"><b>${ayAd(a.ay)}</b></td><td>${fmt(a.toplam)}</td><td>${fmt(a.uygun)}</td>
       <td>${fmt(a.red)}</td><td><span class="rozet ${rozet(a.hata_oran)}">%${a.hata_oran}</span></td>
       <td>${f==null?"—":`<b style="color:${f<=0?"#16a34a":"#dc2626"}">${f>0?"+":""}${f.toFixed(2)} puan</b>`}</td></tr>`;}).join("");
 }
 
+let trendTip = "bar";
 function renderTrend(o){
   const aylik = o.aylik;
-  grafik("gr-trend-adet", {type:"bar",
+  grafik("gr-trend-adet", {type:trendTip,
     data:{labels:aylik.map(a=>ayAd(a.ay)),
-      datasets:[{label:"Toplam", data:aylik.map(a=>a.toplam), backgroundColor:"#93c5fd"},
-                {label:"Uygun Değil", data:aylik.map(a=>a.red), backgroundColor:"#dc2626"}]},
+      datasets:[{label:"Toplam", data:aylik.map(a=>a.toplam), backgroundColor:"#93c5fd", borderColor:"#1d4ed8"},
+                {label:"Uygun Değil", data:aylik.map(a=>a.red), backgroundColor:"#dc2626", borderColor:"#dc2626"}]},
     options:{responsive:true, maintainAspectRatio:false}});
   const topYer = o.uretimTop.slice(0,4).map(u=>u.yer);
   const renk = ["#dc2626","#1d4ed8","#16a34a","#ea580c"];
@@ -228,6 +239,14 @@ function renderTrend(o){
 }
 
 function renderUretim(o){
+  // Sektör vitrini: her üretim yerinin uygunsuzluk talep oranı kartı (tıklanabilir)
+  const topRed = o.saticilar.reduce((t, s) => t + s.red, 0);
+  const sira = o.uretimTop.slice().sort((a, b) => b.oran - a.oran);
+  document.getElementById("sektor-kartlar").innerHTML = sira.map(u =>
+    `<div class="kpi kpi-tik ${u.oran >= 10 ? "kirmizi" : u.oran >= 6 ? "turuncu" : "yesil"}" data-sektor="${u.yer}" title="Tıkla: ${u.yer} kayıtlarını listele">
+      <div class="ad">🏭 ${u.yer}</div><div class="deger">%${u.oran}</div>
+      <div class="delta">${fmt(u.red)} red / ${fmt(u.toplam)} talep • redlerin %${pct(u.red, topRed).toFixed(1)}'i</div>
+    </div>`).join("");
   grafik("gr-uretim-adet", {type:"bar",
     data:{labels:o.uretimTop.map(u=>u.yer),
       datasets:[{label:"Toplam", data:o.uretimTop.map(u=>u.toplam), backgroundColor:"#1d4ed8"},
@@ -237,7 +256,7 @@ function renderUretim(o){
   document.getElementById("tbl-isi").innerHTML =
     `<tr><th>Üretim Yeri</th>` + o.aylar.map(a=>`<th>${ayAd(a)}</th>`).join("") + `<th>Toplam</th></tr>` +
     o.uretimTop.map(u=>`<tr><td class="sol"><b>${u.yer}</b></td>` +
-      o.aylar.map(a=>{ const h=o.isi[u.yer][a]; return `<td><span class="isi" style="background:${isiRenk(h.oran,max)}" title="${fmt(h.red)}/${fmt(h.toplam)}">%${h.oran}</span></td>`;}).join("") +
+      o.aylar.map(a=>{ const h=o.isi[u.yer][a]; return `<td data-u="${u.yer}" data-a="${a}" title="Tıkla: ${u.yer} / ${ayAd(a)} kayıtları"><span class="isi" style="background:${isiRenk(h.oran,max)}" title="${fmt(h.red)}/${fmt(h.toplam)}">%${h.oran}</span></td>`;}).join("") +
       `<td><span class="rozet ${rozet(u.oran)}">%${u.oran}</span><br><small>${fmt(u.red)}/${fmt(u.toplam)}</small></td></tr>`).join("");
 }
 
@@ -247,6 +266,17 @@ function renderSatici(o){
   grafik("gr-satici", {type:"bar",
     data:{labels:top.map(s=>s.ad.slice(0,34)), datasets:[{label:"Hata oranı %", data:top.map(s=>s.oran), backgroundColor:top.map(s=>isiRenk(s.oran,12))}]},
     options:{responsive:true, maintainAspectRatio:false, indexAxis:"y", plugins:{legend:{display:false}}}});
+  // Pareto: en çok red üreten 12 satıcı + kümülatif pay
+  const pr = o.saticilar.filter(s=>s.red>0).sort((a,b)=>b.red-a.red).slice(0,12);
+  const totRed = o.saticilar.reduce((t,s)=>t+s.red,0) || 1;
+  let kum = 0;
+  grafik("gr-pareto", {type:"bar",
+    data:{labels:pr.map(s=>s.ad.slice(0,28)), datasets:[
+      {label:"Red adedi", data:pr.map(s=>s.red), backgroundColor:"#dc2626", xAxisID:"x"},
+      {label:"Kümülatif %", data:pr.map(s=>{kum+=s.red; return +(kum/totRed*100).toFixed(1);}),
+       type:"line", borderColor:"#1d4ed8", backgroundColor:"#1d4ed8", xAxisID:"x1"}]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:"y",
+      scales:{x:{title:{display:true,text:"red adedi"}}, x1:{position:"top", min:0, max:100, title:{display:true,text:"kümülatif %"}, grid:{drawOnChartArea:false}}}}});
   const q = (document.getElementById("satici-ara").value||"").toLocaleLowerCase("tr");
   let rows = o.saticilar.filter(s=>!q || s.ad.toLocaleLowerCase("tr").includes(q));
   rows = rows.sort((a,b)=> (a[saticiSort.key]>b[saticiSort.key]?1:-1)*saticiSort.dir).slice(0,200);
@@ -270,8 +300,11 @@ function renderSatici(o){
     document.getElementById("satici-detay").innerHTML =
       `<div class="kpi"><div class="ad">${s.ad}</div>
        <div>Toplam <b>${fmt(s.toplam)}</b> • Uygun <b>${fmt(s.uygun)}</b> • Red <b>${fmt(s.red)}</b> • Hata <b>%${s.oran}</b></div>
-       <div class="delta">${uret}</div></div>`;
+       <div class="delta">${uret}</div>
+       <div style="margin-top:8px"><button class="btn btn-mavi btn-kucuk" id="satici-kayitlar">🔍 ${fmt(s.toplam)} kaydı listele</button></div></div>`;
     document.getElementById("satici-detay").scrollIntoView({behavior:"smooth", block:"nearest"});
+    document.getElementById("satici-kayitlar").onclick = () =>
+      detayGoster(s.ad + " — kayıtlar", HAM.filter(k => k.satici === s.ad));
   });
 }
 
@@ -439,6 +472,24 @@ function filtreleriDoldur(){
   renderKarsilastirSecenek(ozetHesapla(HAM));
 }
 
+/* ---------- detay modalı (tıkla → kayıtları listele) ---------- */
+function detayGoster(baslik, kayitlar) {
+  const goster = kayitlar.slice(0, 500);
+  document.getElementById("detay-baslik").textContent = baslik;
+  document.getElementById("detay-bilgi").textContent =
+    `${fmt(kayitlar.length)} kayıt bulundu` + (kayitlar.length > 500 ? " — ilk 500 gösteriliyor" : "") + ".";
+  document.getElementById("detay-tablo").innerHTML =
+    `<tr><th>Ay</th><th>Talep No</th><th>Üretim Yeri</th><th>Satıcı</th><th>Malzeme</th><th>Sonuç</th></tr>` +
+    (goster.map(k => `<tr><td>${k.ay ? ayAd(k.ay) : "–"}</td><td>${k.talep || "–"}</td><td>${k.uretim}</td>` +
+      `<td class="sol">${(k.satici || "").slice(0, 45)}</td>` +
+      `<td class="sol">${((k.malzNo || "") + " " + (k.malzAd || "")).slice(0, 45)}</td>` +
+      `<td>${k.sinif === "red" ? "❌ " : k.sinif === "uygun" ? "✅ " : ""}${k.sonuc || "–"}</td></tr>`).join("") ||
+     `<tr><td colspan="6">Kayıt yok</td></tr>`);
+  document.getElementById("detay-modal").classList.add("acik");
+}
+function detayKapat() { document.getElementById("detay-modal").classList.remove("acik"); }
+function mevcutKayitlar() { const f = filtreli(); return f.length ? f : HAM; }
+
 function sekmeleriBagla(){
   document.querySelectorAll(".sekme").forEach(b=>b.onclick=()=>{
     document.querySelectorAll(".sekme").forEach(x=>x.classList.remove("aktif"));
@@ -459,6 +510,38 @@ function sekmeleriBagla(){
   };
   document.getElementById("btn-cmp").onclick=karsilastir;
   document.getElementById("btn-csv").onclick=csvIndir;
+  // detay tıklamaları (delegasyon — tablolar yeniden çizilse de çalışır)
+  document.getElementById("kpi-kartlar").onclick = e => {
+    const k = e.target.closest("[data-kpi]"); if (!k) return;
+    const f = mevcutKayitlar();
+    const map = { tum: [f, "Tüm kayıtlar"], uygun: [f.filter(x => x.sinif === "uygun"), "Uygun kayıtlar"], red: [f.filter(x => x.sinif === "red"), "Uygun değil (red) kayıtlar"] };
+    detayGoster(map[k.dataset.kpi][1], map[k.dataset.kpi][0]);
+  };
+  document.getElementById("tbl-aylar").onclick = e => {
+    const tr = e.target.closest("tr[data-ay]"); if (!tr) return;
+    detayGoster(ayAd(tr.dataset.ay) + " — kayıtlar", mevcutKayitlar().filter(k => k.ay === tr.dataset.ay));
+  };
+  document.getElementById("tbl-isi").onclick = e => {
+    const td = e.target.closest("td[data-u]"); if (!td) return;
+    detayGoster(`${td.dataset.u} / ${ayAd(td.dataset.a)} — kayıtlar`,
+      mevcutKayitlar().filter(k => k.uretim === td.dataset.u && k.ay === td.dataset.a));
+  };
+  document.getElementById("sektor-kartlar").onclick = e => {
+    const k = e.target.closest("[data-sektor]"); if (!k) return;
+    detayGoster(k.dataset.sektor + " sektörü — kayıtlar", mevcutKayitlar().filter(x => x.uretim === k.dataset.sektor));
+  };
+  // trend grafik tipi düğmeleri
+  const tipGuncelle = () => {
+    document.getElementById("tip-bar").classList.toggle("aktif-tip", trendTip === "bar");
+    document.getElementById("tip-cizgi").classList.toggle("aktif-tip", trendTip === "line");
+  };
+  document.getElementById("tip-bar").onclick = () => { trendTip = "bar"; tipGuncelle(); renderTrend(ozetHesapla(mevcutKayitlar())); };
+  document.getElementById("tip-cizgi").onclick = () => { trendTip = "line"; tipGuncelle(); renderTrend(ozetHesapla(mevcutKayitlar())); };
+  tipGuncelle();
+  // detay modal kapatma
+  document.getElementById("detay-kapat").onclick = detayKapat;
+  document.getElementById("detay-modal").onclick = e => { if (e.target.id === "detay-modal") detayKapat(); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") detayKapat(); });
   // dropzone
   const dz = document.getElementById("dropzone");
   const inp = document.getElementById("dosya-input");
